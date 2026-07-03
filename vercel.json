@@ -1,0 +1,6 @@
+{
+  "buildCommand": "go build -o api .",
+  "devCommand": "go run .",
+  "framework": "go",
+  "installCommand": "go mod download"
+}

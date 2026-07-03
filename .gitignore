@@ -1,0 +1,15 @@
+# Compiled binaries
+bin/
+gobank
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, built with 'go test -c'
+*.test
+
+# Output of 'go env'
+*.out
+.env
