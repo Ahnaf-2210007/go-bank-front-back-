@@ -109,6 +109,33 @@ func (h *WebAuthnHandler) handleRegisterFinish(w http.ResponseWriter, r *http.Re
 		return err
 	}
 
+	// Get the user's existing credentials from the database
+	webAuthnCredentials, err := h.store.GetWebAuthnCredentialsByAccountID(account.ID)
+	if err != nil {
+		return err
+	}
+	var creds []webauthn.Credential
+	for _, c := range webAuthnCredentials {
+		// 1. Map the []string transports back to []protocol.AuthenticatorTransport
+		transports := make([]protocol.AuthenticatorTransport, len(c.Transport))
+		for i, t := range c.Transport {
+			transports[i] = protocol.AuthenticatorTransport(t)
+		}
+
+		// 2. Map your custom DB struct back to the library's struct
+		libCred := webauthn.Credential{
+			ID:              c.ID,
+			PublicKey:       c.PublicKey,
+			AttestationType: c.AttestationType,
+			Transport:       transports,
+			Flags:           c.Flags,
+			Authenticator:   c.Authenticator,
+		}
+
+		creds = append(creds, libCred)
+	}
+	account.webAuthnCredentials = creds
+
 	// Get the session data that was stored during registration
 	sessionData, ok := sessionStore[account.Email]
 	if !ok {
@@ -206,6 +233,33 @@ func (h *WebAuthnHandler) handleLoginFinish(w http.ResponseWriter, r *http.Reque
 	if err != nil {
 		return err
 	}
+
+	// Get the user's existing credentials from the database
+	webAuthnCredentials, err := h.store.GetWebAuthnCredentialsByAccountID(account.ID)
+	if err != nil {
+		return err
+	}
+	var creds []webauthn.Credential
+	for _, c := range webAuthnCredentials {
+		// 1. Map the []string transports back to []protocol.AuthenticatorTransport
+		transports := make([]protocol.AuthenticatorTransport, len(c.Transport))
+		for i, t := range c.Transport {
+			transports[i] = protocol.AuthenticatorTransport(t)
+		}
+
+		// 2. Map your custom DB struct back to the library's struct
+		libCred := webauthn.Credential{
+			ID:              c.ID,
+			PublicKey:       c.PublicKey,
+			AttestationType: c.AttestationType,
+			Transport:       transports,
+			Flags:           c.Flags,
+			Authenticator:   c.Authenticator,
+		}
+
+		creds = append(creds, libCred)
+	}
+	account.webAuthnCredentials = creds
 
 	// Get the session data that was stored during login
 	sessionData, ok := sessionStore[account.Email]
