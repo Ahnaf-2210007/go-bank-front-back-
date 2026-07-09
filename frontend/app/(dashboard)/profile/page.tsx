@@ -209,6 +209,12 @@ export default function ProfilePage() {
       }
 
       setPasskeyMessage('Passkey registered successfully. You can now use it from the login page.');
+      
+      // Refresh account to reflect passkey status
+      const refreshedAccount = await api.getAccount(token);
+      if (refreshedAccount.data) {
+        setAccount(refreshedAccount.data);
+      }
     } catch (registrationError) {
       setPasskeyError(registrationError instanceof Error ? registrationError.message : 'Passkey registration failed');
     } finally {
@@ -259,40 +265,42 @@ export default function ProfilePage() {
       }
     >
       <div className="space-y-6">
-        <Card className="border-accent/15 bg-[linear-gradient(180deg,rgba(78,162,255,0.12),rgba(255,255,255,0.03))]">
+        <Card className={`border-accent/15 ${account?.hasPasskey ? 'bg-[linear-gradient(180deg,rgba(34,197,94,0.12),rgba(255,255,255,0.03))]' : 'bg-[linear-gradient(180deg,rgba(78,162,255,0.12),rgba(255,255,255,0.03))]'}`}>
           <CardHeader className="pb-3">
-            <CardDescription>Passkey enrollment</CardDescription>
-            <CardTitle className="text-xl text-white">Register a device passkey</CardTitle>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardDescription>Security</CardDescription>
+                <CardTitle className="text-xl text-white">
+                  {account?.hasPasskey ? 'Passkey Registered' : 'Register a Device Passkey'}
+                </CardTitle>
+              </div>
+              {account?.hasPasskey && <Badge className="bg-success text-white">✓ Active</Badge>}
+            </div>
           </CardHeader>
           <CardContent className="space-y-4 pt-0">
-            <PasskeyAlert
-              supported={webauthnSupported()}
-              message={webauthnSupported()
-                ? 'Use a passkey to speed up future sign-ins without changing your password workflow.'
-                : unsupportedWebauthnMessage()}
-            />
+            {account?.hasPasskey ? (
+              <div className="rounded-lg border border-success/30 bg-success/5 p-3">
+                <p className="text-sm text-success">Your passkey is registered and ready to use for quick sign-ins.</p>
+              </div>
+            ) : (
+              <>
+                <PasskeyAlert
+                  supported={webauthnSupported()}
+                  message={webauthnSupported()
+                    ? 'Use a passkey to speed up future sign-ins without changing your password workflow.'
+                    : unsupportedWebauthnMessage()}
+                />
+              </>
+            )}
             {passkeyError ? <Alert variant="warning" title="Passkey registration issue">{passkeyError}</Alert> : null}
             {passkeyMessage ? <Alert variant="success" title="Passkey registered">{passkeyMessage}</Alert> : null}
-            <Button type="button" variant="secondary" onClick={handlePasskeyRegistration} disabled={passkeyLoading}>
-              {passkeyLoading ? 'Registering passkey...' : 'Register Passkey'}
-            </Button>
+            {!account?.hasPasskey && (
+              <Button type="button" variant="secondary" onClick={handlePasskeyRegistration} disabled={passkeyLoading || !webauthnSupported()}>
+                {passkeyLoading ? 'Registering passkey...' : 'Register Passkey'}
+              </Button>
+            )}
           </CardContent>
         </Card>
-
-        <div className="mb-6 grid gap-3 md:grid-cols-3">
-          <div className="rounded-2xl border border-border/60 bg-white/[0.03] p-4">
-            <p className="text-xs uppercase tracking-[0.22em] text-muted">Account holder</p>
-            <p className="mt-2 text-base font-semibold text-white">{account ? `${account.firstName} ${account.lastName}` : ''}</p>
-          </div>
-          <div className="rounded-2xl border border-border/60 bg-white/[0.03] p-4">
-            <p className="text-xs uppercase tracking-[0.22em] text-muted">Account number</p>
-            <p className="mt-2 text-base font-semibold tracking-[0.14em] text-white">{account?.number}</p>
-          </div>
-          <div className="rounded-2xl border border-border/60 bg-white/[0.03] p-4">
-            <p className="text-xs uppercase tracking-[0.22em] text-muted">Email</p>
-            <p className="mt-2 text-base font-semibold text-white">{account?.email}</p>
-          </div>
-        </div>
 
         <form id="profile-form" onSubmit={submit} className="space-y-5">
           {error ? <Alert variant="destructive" title="Update error">{error}</Alert> : null}

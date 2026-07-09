@@ -192,11 +192,48 @@ export default function DashboardPage() {
               </p>
             </div>
 
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                <p className="text-xs uppercase tracking-[0.14em] text-slate-300/70">Account Status</p>
+                <p className="mt-2 text-sm font-semibold text-white">Active & Verified</p>
+              </div>
+              <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                <p className="text-xs uppercase tracking-[0.14em] text-slate-300/70">Member Since</p>
+                <p className="mt-2 text-sm font-semibold text-white">{new Date(account.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
+              </div>
+              <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                <p className="text-xs uppercase tracking-[0.14em] text-slate-300/70">Account Type</p>
+                <p className="mt-2 text-sm font-semibold text-white">Premium Banking</p>
+              </div>
+              <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                <p className="text-xs uppercase tracking-[0.14em] text-slate-300/70">Security</p>
+                <p className="mt-2 text-sm font-semibold text-success">2FA Ready</p>
+              </div>
+            </div>
+
+            <div className="space-y-2 rounded-2xl border border-accent/20 bg-[linear-gradient(180deg,rgba(78,162,255,0.12),rgba(78,162,255,0.04))] p-4">
+              <p className="text-xs uppercase tracking-[0.14em] font-semibold text-accent">Why Choose GoBank?</p>
+              <ul className="space-y-1 text-xs text-slate-200/80">
+                <li className="flex items-start gap-2">
+                  <span className="mt-1 text-accent">✓</span>
+                  <span>Bank-grade security with passkey authentication</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="mt-1 text-accent">✓</span>
+                  <span>Instant transfers between accounts</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="mt-1 text-accent">✓</span>
+                  <span>Exclusive offers and rewards</span>
+                </li>
+              </ul>
+            </div>
+
             <div className="flex flex-wrap gap-3">
-              <Button variant="secondary" size="md" disabled>
+              <Button variant="secondary" size="md" onClick={() => router.push('/dashboard/profile')}>
                 View profile
               </Button>
-              <Button variant="ghost" size="md" disabled>
+              <Button variant="ghost" size="md" onClick={() => router.push('/dashboard/history')}>
                 Explore activity
               </Button>
             </div>

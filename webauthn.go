@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/go-webauthn/webauthn/protocol"
@@ -168,6 +169,13 @@ func (h *WebAuthnHandler) handleRegisterFinish(w http.ResponseWriter, r *http.Re
 
 	if err := h.store.CreateWebAuthnCredential(webAuthnCred, account.ID); err != nil {
 		return err
+	}
+
+	// Update account to mark hasPasskey as true
+	account.HasPasskey = true
+	if err := h.store.UpdateAccountPasskeyStatus(account.ID, true); err != nil {
+		log.Printf("failed to update passkey status for account %d: %v", account.ID, err)
+		// Don't fail the registration response, just log the error
 	}
 
 	return WriteJSON(w, http.StatusOK, map[string]string{"status": "ok"})
