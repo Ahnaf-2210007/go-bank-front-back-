@@ -191,8 +191,11 @@ func (s *PostgresStore) CreateAccountTable() error {
 	}
 
 	// Add has_passkey column if it does not exist yet.
-	_, err = s.db.Exec(`ALTER TABLE account ADD COLUMN IF NOT EXISTS has_passkey BOOLEAN DEFAULT false;`)
-	return err
+	if _, err := s.db.Exec(`ALTER TABLE account ADD COLUMN IF NOT EXISTS has_passkey BOOLEAN DEFAULT false;`); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (s *PostgresStore) CreateAccount(acc *Account) error {
