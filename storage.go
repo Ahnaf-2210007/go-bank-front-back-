@@ -33,11 +33,12 @@ type Storage interface {
 	CreateWebAuthnCredential(cred *WebAuthnCredential, accountID int) error
 	GetWebAuthnCredentialsByAccountID(accountID int) ([]*WebAuthnCredential, error)
 	CreateWebAuthnCredentialTable() error
+	UpdateAccountPasskeyStatus(accountID int, hasPasskey bool) error
 }
 
 func (s *PostgresStore) GetAccountByEmail(email string) (*Account, error) {
 	row := s.db.QueryRow(`
-		SELECT id, first_name, last_name, number, COALESCE(email, ''), COALESCE(encrypted_password, ''), balance, created_at
+		SELECT id, first_name, last_name, number, COALESCE(email, ''), COALESCE(encrypted_password, ''), balance, COALESCE(has_passkey, false), created_at
 		FROM account
 		WHERE email = $1`, email)
 
@@ -50,6 +51,7 @@ func (s *PostgresStore) GetAccountByEmail(email string) (*Account, error) {
 		&acc.Email,
 		&acc.EncryptedPassword,
 		&acc.Balance,
+		&acc.HasPasskey,
 		&acc.CreatedAt,
 	)
 	if err == sql.ErrNoRows {
@@ -184,7 +186,12 @@ func (s *PostgresStore) CreateAccountTable() error {
 	}
 
 	// Add email column if it does not exist yet.
-	_, err := s.db.Exec(`ALTER TABLE account ADD COLUMN IF NOT EXISTS email VARCHAR(255);`)
+	if _, err := s.db.Exec(`ALTER TABLE account ADD COLUMN IF NOT EXISTS email VARCHAR(255);`); err != nil {
+		return err
+	}
+
+	// Add has_passkey column if it does not exist yet.
+	_, err = s.db.Exec(`ALTER TABLE account ADD COLUMN IF NOT EXISTS has_passkey BOOLEAN DEFAULT false;`)
 	return err
 }
 
@@ -295,7 +302,7 @@ func (s *PostgresStore) DeleteAccount(id int) error {
 
 func (s *PostgresStore) GetAccountByNumber(number int64) (*Account, error) {
 	row := s.db.QueryRow(`
-		SELECT id, first_name, last_name, number, COALESCE(email, ''), COALESCE(encrypted_password, ''), balance, created_at
+		SELECT id, first_name, last_name, number, COALESCE(email, ''), COALESCE(encrypted_password, ''), balance, COALESCE(has_passkey, false), created_at
 		FROM account
 		WHERE number = $1`, number)
 
@@ -308,6 +315,7 @@ func (s *PostgresStore) GetAccountByNumber(number int64) (*Account, error) {
 		&acc.Email,
 		&acc.EncryptedPassword,
 		&acc.Balance,
+		&acc.HasPasskey,
 		&acc.CreatedAt,
 	)
 	if err == sql.ErrNoRows {
@@ -322,7 +330,7 @@ func (s *PostgresStore) GetAccountByNumber(number int64) (*Account, error) {
 
 func (s *PostgresStore) GetAccountByID(id int) (*Account, error) {
 	row := s.db.QueryRow(`
-		SELECT id, first_name, last_name, number, COALESCE(email, ''), COALESCE(encrypted_password, ''), balance, created_at
+		SELECT id, first_name, last_name, number, COALESCE(email, ''), COALESCE(encrypted_password, ''), balance, COALESCE(has_passkey, false), created_at
 		FROM account
 		WHERE id = $1`, id)
 
@@ -335,6 +343,7 @@ func (s *PostgresStore) GetAccountByID(id int) (*Account, error) {
 		&acc.Email,
 		&acc.EncryptedPassword,
 		&acc.Balance,
+		&acc.HasPasskey,
 		&acc.CreatedAt,
 	)
 	if err == sql.ErrNoRows {
@@ -672,6 +681,14 @@ func (s *PostgresStore) UpdateAccountPassword(accountID int, encryptedPassword s
 	_, err := s.db.Exec(
 		`UPDATE account SET encrypted_password = $1 WHERE id = $2`,
 		encryptedPassword, accountID,
+	)
+	return err
+}
+
+func (s *PostgresStore) UpdateAccountPasskeyStatus(accountID int, hasPasskey bool) error {
+	_, err := s.db.Exec(
+		`UPDATE account SET has_passkey = $1 WHERE id = $2`,
+		hasPasskey, accountID,
 	)
 	return err
 }

@@ -141,6 +141,7 @@ type Account struct {
 	Email               string                `json:"email"`
 	EncryptedPassword   string                `json:"-"`
 	Balance             int64                 `json:"balance"`
+	HasPasskey          bool                  `json:"hasPasskey"`
 	CreatedAt           time.Time             `json:"createdAt"`
 	webAuthnCredentials []webauthn.Credential `json:"-"`
 }

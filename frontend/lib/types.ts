@@ -36,6 +36,7 @@ export interface AccountResponse {
   lastName: string;
   number: number;
   balance: number;
+  hasPasskey: boolean;
   createdAt: string;
 }
 

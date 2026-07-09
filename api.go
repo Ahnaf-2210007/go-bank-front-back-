@@ -313,15 +313,66 @@ func sendVerificationEmail(email, code string, cfg *Config) error {
 	addr := host + ":" + port
 	auth := smtp.PlainAuth("", cfg.SMTPEmail, cfg.SMTPPassword, host)
 
+	htmlBody := fmt.Sprintf(`<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; margin: 0; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .header { background: linear-gradient(135deg, #4ea2ff 0%%, #0066cc 100%%); padding: 40px 20px; text-align: center; }
+        .logo { font-size: 28px; font-weight: bold; color: white; margin-bottom: 10px; }
+        .tagline { color: rgba(255,255,255,0.9); font-size: 14px; }
+        .content { padding: 40px 30px; }
+        .greeting { font-size: 24px; font-weight: 600; color: #1a1a1a; margin-bottom: 15px; }
+        .description { font-size: 15px; color: #666; line-height: 1.6; margin-bottom: 30px; }
+        .code-box { background: linear-gradient(135deg, #4ea2ff15 0%%, #0066cc10 100%%); border: 1px solid #4ea2ff30; border-radius: 8px; padding: 20px; text-align: center; margin: 30px 0; }
+        .code-label { font-size: 12px; color: #666; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+        .code { font-size: 36px; font-weight: 700; color: #4ea2ff; letter-spacing: 4px; font-family: 'Courier New', monospace; }
+        .info-box { background: #f9f9f9; border-left: 4px solid #4ea2ff; padding: 15px; margin: 20px 0; border-radius: 4px; }
+        .info-box p { margin: 0; font-size: 14px; color: #666; }
+        .footer { background: #f5f5f5; padding: 20px 30px; border-top: 1px solid #eee; font-size: 12px; color: #999; text-align: center; }
+        .button { display: inline-block; background: linear-gradient(135deg, #4ea2ff 0%%, #0066cc 100%%); color: white; padding: 12px 30px; border-radius: 6px; text-decoration: none; font-weight: 600; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">🏦 GoBank</div>
+            <div class="tagline">Secure Banking Made Simple</div>
+        </div>
+        <div class="content">
+            <p class="greeting">Verify Your Email</p>
+            <p class="description">
+                We're excited to have you join GoBank. To complete your signup and secure your account, please use the verification code below:
+            </p>
+            <div class="code-box">
+                <div class="code-label">Your Verification Code</div>
+                <div class="code">%s</div>
+            </div>
+            <div class="info-box">
+                <p><strong>⏰ Code Expires:</strong> This code is valid for 5 minutes. If you don't use it in time, request a new one.</p>
+            </div>
+            <p style="font-size: 14px; color: #666; margin-top: 20px;">
+                <strong>Didn't sign up?</strong><br>
+                If you didn't create this account, you can safely ignore this email. Your account won't be created until you verify your email.
+            </p>
+        </div>
+        <div class="footer">
+            <p>© 2024 GoBank. All rights reserved. | <a href="#" style="color: #4ea2ff; text-decoration: none;">Privacy Policy</a> | <a href="#" style="color: #4ea2ff; text-decoration: none;">Terms of Service</a></p>
+        </div>
+    </div>
+</body>
+</html>`, code)
+
 	msg := strings.Join([]string{
 		"From: " + cfg.SMTPEmail,
 		"To: " + email,
 		"Subject: Your GoBank Verification Code",
 		"MIME-Version: 1.0",
-		"Content-Type: text/plain; charset=\"UTF-8\"",
+		"Content-Type: text/html; charset=\"UTF-8\"",
 		"",
-		fmt.Sprintf("Your GoBank verification code is: %s", code),
-		"This code expires in 5 minutes.",
+		htmlBody,
 	}, "\r\n")
 
 	if err := smtp.SendMail(addr, auth, cfg.SMTPEmail, []string{email}, []byte(msg)); err != nil {
@@ -405,40 +456,104 @@ func sendSignupConfirmationEmail(account *Account, cfg *Config) error {
 		fullName = "GoBank User"
 	}
 
+	htmlBody := fmt.Sprintf(`<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; margin: 0; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .header { background: linear-gradient(135deg, #4ea2ff 0%%, #0066cc 100%%); padding: 40px 20px; text-align: center; }
+        .logo { font-size: 28px; font-weight: bold; color: white; margin-bottom: 10px; }
+        .tagline { color: rgba(255,255,255,0.9); font-size: 14px; }
+        .content { padding: 40px 30px; }
+        .greeting { font-size: 24px; font-weight: 600; color: #1a1a1a; margin-bottom: 15px; }
+        .description { font-size: 15px; color: #666; line-height: 1.6; margin-bottom: 20px; }
+        .section-title { font-size: 14px; font-weight: 700; color: #4ea2ff; text-transform: uppercase; letter-spacing: 1px; margin: 25px 0 15px 0; }
+        .detail-item { background: #f9f9f9; border-left: 4px solid #4ea2ff; padding: 12px 15px; margin: 10px 0; border-radius: 4px; }
+        .detail-label { font-size: 12px; color: #999; text-transform: uppercase; letter-spacing: 0.5px; }
+        .detail-value { font-size: 16px; font-weight: 600; color: #1a1a1a; margin-top: 4px; }
+        .feature-box { background: #f0f4ff; border: 1px solid #dde7ff; border-radius: 8px; padding: 15px; margin: 10px 0; }
+        .feature-box strong { color: #4ea2ff; }
+        .feature-box p { margin: 5px 0; font-size: 13px; color: #555; }
+        .security-box { background: #fffbf0; border-left: 4px solid #ff9800; padding: 15px; margin: 20px 0; border-radius: 4px; }
+        .security-box strong { color: #ff9800; }
+        .security-box p { margin: 5px 0; font-size: 13px; color: #555; }
+        .footer { background: #f5f5f5; padding: 20px 30px; border-top: 1px solid #eee; font-size: 12px; color: #999; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">🏦 GoBank</div>
+            <div class="tagline">Welcome to Secure Banking</div>
+        </div>
+        <div class="content">
+            <p class="greeting">Welcome, %s! 🎉</p>
+            <p class="description">
+                Your GoBank account has been successfully created and verified. You're all set to start managing your finances securely.
+            </p>
+            
+            <div class="section-title">📋 Your Account Details</div>
+            <div class="detail-item">
+                <div class="detail-label">Account Holder</div>
+                <div class="detail-value">%s</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Account Number</div>
+                <div class="detail-value">%d</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Account ID</div>
+                <div class="detail-value">#%d</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Current Balance</div>
+                <div class="detail-value">$%.2f</div>
+            </div>
+
+            <div class="section-title">🚀 Next Steps</div>
+            <div class="feature-box">
+                <strong>1. Complete Your Profile</strong>
+                <p>Add a profile picture and additional information to personalize your account.</p>
+            </div>
+            <div class="feature-box">
+                <strong>2. Register a Passkey</strong>
+                <p>Set up a passkey for faster and more secure login. No more passwords needed!</p>
+            </div>
+            <div class="feature-box">
+                <strong>3. Explore Features</strong>
+                <p>Start making transfers, check your history, and discover exclusive GoBank offers.</p>
+            </div>
+
+            <div class="security-box">
+                <strong>🔒 Security Reminder</strong>
+                <p>• Never share your password or verification codes with anyone</p>
+                <p>• Always enable two-factor authentication when available</p>
+                <p>• Only access GoBank through official channels</p>
+                <p>• Logout when using shared computers</p>
+            </div>
+
+            <p style="font-size: 13px; color: #666; margin-top: 20px; text-align: center;">
+                <strong>Need Help?</strong><br>
+                Visit our support center or contact us at support@gobank.com
+            </p>
+        </div>
+        <div class="footer">
+            <p>© 2024 GoBank. All rights reserved. | <a href="#" style="color: #4ea2ff; text-decoration: none;">Privacy Policy</a> | <a href="#" style="color: #4ea2ff; text-decoration: none;">Terms of Service</a></p>
+        </div>
+    </div>
+</body>
+</html>`, fullName, fullName, account.Number, account.ID, float64(account.Balance)/100)
+
 	msg := strings.Join([]string{
 		"From: " + cfg.SMTPEmail,
 		"To: " + account.Email,
 		"Subject: Welcome to GoBank - Account Confirmation",
 		"MIME-Version: 1.0",
-		"Content-Type: text/plain; charset=\"UTF-8\"",
+		"Content-Type: text/html; charset=\"UTF-8\"",
 		"",
-		fmt.Sprintf("Hello %s,", fullName),
-		"",
-		"Welcome to GoBank! Your account has been successfully created and verified.",
-		"",
-		"=== ACCOUNT DETAILS ===",
-		fmt.Sprintf("Account Holder: %s", fullName),
-		fmt.Sprintf("Account Number: %d", account.Number),
-		fmt.Sprintf("Account ID: %d", account.ID),
-		fmt.Sprintf("Current Balance: $%.2f", float64(account.Balance)/100),
-		"",
-		"=== NEXT STEPS ===",
-		"1. Log in to your GoBank account",
-		"2. Complete your profile with additional information",
-		"3. Set up a passkey for enhanced security",
-		"4. Start making transfers and enjoying exclusive offers",
-		"",
-		"=== SECURITY REMINDER ===",
-		"- Never share your password or verification codes",
-		"- Enable two-factor authentication for added security",
-		"- Always use secure connections when accessing your account",
-		"",
-		"If you did not create this account, please contact our support team immediately.",
-		"",
-		"Best regards,",
-		"The GoBank Team",
-		"",
-		"This is an automated message. Please do not reply to this email.",
+		htmlBody,
 	}, "\r\n")
 
 	if err := smtp.SendMail(addr, auth, cfg.SMTPEmail, []string{account.Email}, []byte(msg)); err != nil {
