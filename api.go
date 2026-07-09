@@ -271,6 +271,13 @@ func (s *APIServer) handleVerification(w http.ResponseWriter, r *http.Request) e
 		log.Printf("failed to delete pending account %d: %v", pending.ID, err)
 	}
 
+	// Send signup confirmation email with account details
+	go func(acc *Account, cfg *Config) {
+		if err := sendSignupConfirmationEmail(acc, cfg); err != nil {
+			log.Printf("failed to send signup confirmation email to %s: %v", acc.Email, err)
+		}
+	}(account, s.cfg)
+
 	token, err := createJWT(account, s.cfg.JWTSecret)
 	if err != nil {
 		return err
@@ -378,6 +385,68 @@ func maskedAccountNumber(number int64) string {
 		return numberStr
 	}
 	return strings.Repeat("*", len(numberStr)-4) + numberStr[len(numberStr)-4:]
+}
+
+// sendSignupConfirmationEmail sends a welcome email after successful account verification
+// with account details including name, account number, ID, and current balance
+func sendSignupConfirmationEmail(account *Account, cfg *Config) error {
+	if cfg.SMTPEmail == "" || cfg.SMTPPassword == "" {
+		log.Printf("SMTP_EMAIL or SMTP_PASSWORD not set - signup confirmation for %s: number=%d id=%d balance=%d", account.Email, account.Number, account.ID, account.Balance)
+		return nil
+	}
+
+	host := cfg.SMTPHost
+	port := cfg.SMTPPort
+	addr := host + ":" + port
+	auth := smtp.PlainAuth("", cfg.SMTPEmail, cfg.SMTPPassword, host)
+
+	fullName := strings.TrimSpace(account.FirstName + " " + account.LastName)
+	if fullName == "" {
+		fullName = "GoBank User"
+	}
+
+	msg := strings.Join([]string{
+		"From: " + cfg.SMTPEmail,
+		"To: " + account.Email,
+		"Subject: Welcome to GoBank - Account Confirmation",
+		"MIME-Version: 1.0",
+		"Content-Type: text/plain; charset=\"UTF-8\"",
+		"",
+		fmt.Sprintf("Hello %s,", fullName),
+		"",
+		"Welcome to GoBank! Your account has been successfully created and verified.",
+		"",
+		"=== ACCOUNT DETAILS ===",
+		fmt.Sprintf("Account Holder: %s", fullName),
+		fmt.Sprintf("Account Number: %d", account.Number),
+		fmt.Sprintf("Account ID: %d", account.ID),
+		fmt.Sprintf("Current Balance: $%.2f", float64(account.Balance)/100),
+		"",
+		"=== NEXT STEPS ===",
+		"1. Log in to your GoBank account",
+		"2. Complete your profile with additional information",
+		"3. Set up a passkey for enhanced security",
+		"4. Start making transfers and enjoying exclusive offers",
+		"",
+		"=== SECURITY REMINDER ===",
+		"- Never share your password or verification codes",
+		"- Enable two-factor authentication for added security",
+		"- Always use secure connections when accessing your account",
+		"",
+		"If you did not create this account, please contact our support team immediately.",
+		"",
+		"Best regards,",
+		"The GoBank Team",
+		"",
+		"This is an automated message. Please do not reply to this email.",
+	}, "\r\n")
+
+	if err := smtp.SendMail(addr, auth, cfg.SMTPEmail, []string{account.Email}, []byte(msg)); err != nil {
+		return err
+	}
+
+	log.Printf("signup confirmation email sent to %s for account %d", account.Email, account.ID)
+	return nil
 }
 
 func (s *APIServer) handleDeleteAccount(w http.ResponseWriter, r *http.Request) error {
