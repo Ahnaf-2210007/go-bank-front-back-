@@ -392,7 +392,7 @@ func generateTransactionID() (string, error) {
 	return fmt.Sprintf("TXN-%012d", n.Int64()), nil
 }
 
-func sendTransferNotificationEmail(email string, isRecipient bool, recipientName, senderName string, transfer *TransferResult, recipient *Account, cfg *Config) error {
+func sendTransferNotificationEmail(email string, isRecipient bool, personName, otherPersonName string, transfer *TransferResult, recipient *Account, cfg *Config) error {
 	if strings.TrimSpace(email) == "" {
 		log.Printf("transfer notification skipped for transaction %s: missing recipient email", transfer.TransactionID)
 		return nil
@@ -413,13 +413,13 @@ func sendTransferNotificationEmail(email string, isRecipient bool, recipientName
 	var amountColor string = "#059669"
 
 	if isRecipient {
-		subject = fmt.Sprintf("Payment Received - $%.2f from %s", float64(transfer.Amount)/100.0, senderName)
-		greeting = fmt.Sprintf("Hello %s,", recipientName)
-		actionText = fmt.Sprintf("You have received a transfer of <strong style=\"color: %s;\">$%.2f</strong> from %s.", amountColor, float64(transfer.Amount)/100.0, senderName)
+		subject = fmt.Sprintf("Payment Received - $%.2f from %s", float64(transfer.Amount)/100.0, otherPersonName)
+		greeting = fmt.Sprintf("Hello %s,", personName)
+		actionText = fmt.Sprintf("You have received a transfer of <strong style=\"color: %s;\">$%.2f</strong> from %s.", amountColor, float64(transfer.Amount)/100.0, otherPersonName)
 	} else {
-		subject = fmt.Sprintf("Transfer Complete - $%.2f sent to %s", float64(transfer.Amount)/100.0, recipientName)
-		greeting = fmt.Sprintf("Hello %s,", senderName)
-		actionText = fmt.Sprintf("You have successfully transferred <strong style=\"color: %s;\">$%.2f</strong> to %s.", amountColor, float64(transfer.Amount)/100.0, recipientName)
+		subject = fmt.Sprintf("Transfer Complete - $%.2f sent to %s", float64(transfer.Amount)/100.0, otherPersonName)
+		greeting = fmt.Sprintf("Hello %s,", personName)
+		actionText = fmt.Sprintf("You have successfully transferred <strong style=\"color: %s;\">$%.2f</strong> to %s.", amountColor, float64(transfer.Amount)/100.0, otherPersonName)
 	}
 
 	formattedAmount := fmt.Sprintf("$%.2f", float64(transfer.Amount)/100.0)
