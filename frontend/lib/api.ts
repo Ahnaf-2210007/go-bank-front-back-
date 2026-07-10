@@ -2,6 +2,7 @@ const DEFAULT_API_BASE_URL = 'http://localhost:3000';
 
 import type {
   AccountResponse,
+  ActivityEvent,
   ApiResponse,
   LoginRequest,
   LoginResponse,
@@ -197,6 +198,16 @@ export const api = {
     });
   },
 
+  async getActivity(token: string): Promise<ApiResponse<ActivityEvent[]>> {
+    return this.requestJson<ActivityEvent[]>('/account/activity', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  },
+
   async updateAccount(
     token: string,
     data: UpdateProfileRequest,
@@ -287,4 +298,27 @@ export const api = {
       return false;
     }
   },
+};
+
+// Re-export types from types.ts for convenience
+export type {
+  AccountResponse,
+  ActivityEvent,
+  ApiResponse,
+  LoginRequest,
+  LoginResponse,
+  OfferRequest,
+  OfferResponse,
+  PublicKeyCredentialCreationOptionsJSON,
+  PublicKeyCredentialRequestOptionsJSON,
+  RegisterRequest,
+  RegisterResponse,
+  TransactionRecord,
+  TransferRequest,
+  TransferResponse,
+  WebAuthnLoginResponse,
+  WebAuthnLoginBeginRequest,
+  WebAuthnRegistrationBeginRequest,
+  UpdateProfileRequest,
+  VerifyEmailRequest,
 };

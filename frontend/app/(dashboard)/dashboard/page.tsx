@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { auth } from '@/lib/auth';
 import { api, AccountResponse } from '@/lib/api';
+import { ActivityEvent } from '@/lib/types';
 import { Alert } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -15,6 +16,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 export default function DashboardPage() {
   const router = useRouter();
   const [account, setAccount] = useState<AccountResponse | null>(null);
+  const [activity, setActivity] = useState<ActivityEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -29,21 +31,28 @@ export default function DashboardPage() {
         return;
       }
 
-      const response = await api.getAccount(token);
+      const [accountResponse, activityResponse] = await Promise.all([
+        api.getAccount(token),
+        api.getActivity(token),
+      ]);
 
       if (!mounted) {
         return;
       }
 
-      if (response.error) {
-        setError(response.error);
+      if (accountResponse.error) {
+        setError(accountResponse.error);
         auth.logout();
         router.replace('/login');
         return;
       }
 
-      if (response.data) {
-        setAccount(response.data);
+      if (accountResponse.data) {
+        setAccount(accountResponse.data);
+      }
+
+      if (activityResponse.data) {
+        setActivity(activityResponse.data);
       }
 
       setLoading(false);
@@ -91,26 +100,50 @@ export default function DashboardPage() {
     },
   ] as const;
 
-  const activityRows = [
-    {
-      event: 'Secure login session established',
-      status: 'Complete',
-      detail: 'JWT session checked from localStorage',
-      time: 'Just now',
-    },
-    {
-      event: 'Account summary loaded',
-      status: 'Synced',
-      detail: 'Balance and profile details are current',
-      time: 'Moments ago',
-    },
-    {
-      event: 'Transaction history slot reserved',
-      status: 'Preview',
-      detail: 'Future activity feed will appear here',
-      time: 'Ready for phase 2',
-    },
-  ] as const;
+  const getActivityTitle = (event: ActivityEvent) => {
+    switch (event.type) {
+      case 'transfer_sent':
+        return event.title;
+      case 'transfer_received':
+        return event.title;
+      case 'account_created':
+        return 'Account Created';
+      case 'passkey_registered':
+        return 'Passkey Registered';
+      case 'profile_update':
+        return 'Profile Updated';
+      default:
+        return event.title;
+    }
+  };
+
+  const getStatusBadgeVariant = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'completed':
+        return 'success';
+      case 'synced':
+        return 'secondary';
+      case 'pending':
+        return 'secondary';
+      default:
+        return 'secondary';
+    }
+  };
+
+  const formatTime = (timestamp: string) => {
+    const now = new Date();
+    const date = new Date(timestamp);
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    if (diffDays < 7) return `${diffDays}d ago`;
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  };
 
   if (loading) {
     return (
@@ -310,44 +343,48 @@ export default function DashboardPage() {
             <p className="text-sm uppercase tracking-[0.28em] text-muted">Recent activity</p>
             <CardTitle className="mt-2 text-xl text-white sm:text-2xl">Preview of transaction history</CardTitle>
             <CardDescription>
-              This section is ready for the transaction feed once transfers, offers, and history are wired up.
+              Your recent account activity and transfers appear below in real-time.
             </CardDescription>
           </div>
-          <Badge variant="secondary">Placeholder feed</Badge>
+          <Badge variant="secondary">{activity.length > 0 ? 'Live' : 'No activity'}</Badge>
         </CardHeader>
         <CardContent>
-          <div className="overflow-hidden rounded-[1.25rem] border border-border/60 bg-white/[0.02]">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Activity</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Details</TableHead>
-                  <TableHead className="text-right">Time</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {activityRows.map((row) => (
-                  <TableRow key={row.event}>
-                    <TableCell className="font-medium text-foreground">{row.event}</TableCell>
-                    <TableCell>
-                      <Badge variant={row.status === 'Complete' ? 'success' : 'secondary'}>{row.status}</Badge>
-                    </TableCell>
-                    <TableCell className="text-muted">{row.detail}</TableCell>
-                    <TableCell className="text-right text-muted">{row.time}</TableCell>
+          {activity.length > 0 ? (
+            <div className="overflow-hidden rounded-[1.25rem] border border-border/60 bg-white/[0.02]">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Activity</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Details</TableHead>
+                    <TableHead className="text-right">Time</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-
-          <div className="mt-5">
-            <EmptyState
-              title="Transaction history will populate here"
-              description="Transfers, offers, and passkey activity can all flow into this area without redesigning the shell."
-              icon={<span className="text-2xl">⟡</span>}
-            />
-          </div>
+                </TableHeader>
+                <TableBody>
+                  {activity.map((event, index) => (
+                    <TableRow key={`${event.type}-${index}`}>
+                      <TableCell className="font-medium text-foreground">{getActivityTitle(event)}</TableCell>
+                      <TableCell>
+                        <Badge variant={getStatusBadgeVariant(event.status)}>
+                          {event.status.charAt(0).toUpperCase() + event.status.slice(1)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-muted">{event.details}</TableCell>
+                      <TableCell className="text-right text-muted">{formatTime(event.timestamp)}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          ) : (
+            <div className="mt-5">
+              <EmptyState
+                title="Transaction history will populate here"
+                description="Transfers, offers, and passkey activity can all flow into this area without redesigning the shell."
+                icon={<span className="text-2xl">⟡</span>}
+              />
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
