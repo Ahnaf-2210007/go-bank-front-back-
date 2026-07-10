@@ -50,11 +50,11 @@ function VerifyContent() {
       title="Verify email"
       description={`Enter the verification code sent to ${email || 'your email'}.`}
       eyebrow={
-        <div className="flex flex-wrap gap-2">
-          <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-slate-200/80">
+        <div className="flex flex-wrap gap-2 animate-entrance">
+          <span className="rounded-full border border-success/30 bg-success/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-success-light animate-entrance-up">
             Email verification
           </span>
-          <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-slate-200/80">
+          <span className="rounded-full border border-accent/30 bg-accent/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-accent-strong animate-entrance-up">
             6 digits
           </span>
         </div>
@@ -68,11 +68,11 @@ function VerifyContent() {
         </p>
       }
     >
-      <form onSubmit={handleSubmit} className="space-y-5">
-        {error ? <Alert variant="destructive" title="Verification error">{error}</Alert> : null}
-        {success ? <Alert variant="success" title="Verification complete">{success}</Alert> : null}
+      <form onSubmit={handleSubmit} className="space-y-5 animate-stagger">
+        {error ? <Alert variant="destructive" title="Verification error" icon="✕">{error}</Alert> : null}
+        {success ? <Alert variant="success" title="Verification complete" icon="✓">{success}</Alert> : null}
 
-        <div className="space-y-2">
+        <div className="space-y-2 animate-entrance-up">
           <label htmlFor="code" className="text-sm font-medium text-slate-200">Verification code</label>
           <Input
             id="code"
@@ -81,16 +81,16 @@ function VerifyContent() {
             onChange={(e) => setCode(e.target.value)}
             required
             maxLength={6}
-            className="text-center text-2xl tracking-[0.35em]"
+            className="text-center text-2xl tracking-[0.35em] bg-gradient-to-r from-primary/10 to-transparent border-primary/40"
             placeholder="000000"
           />
         </div>
 
-        <p className="text-xs leading-6 text-slate-300/70">
+        <p className="text-xs leading-6 text-slate-300/70 animate-entrance-up">
           Check your email for the verification code. It may take a few minutes to arrive.
         </p>
 
-        <Button type="submit" disabled={loading} className="w-full">
+        <Button type="submit" disabled={loading} className="w-full animate-entrance-up">
           {loading ? 'Verifying...' : 'Verify Email'}
         </Button>
       </form>

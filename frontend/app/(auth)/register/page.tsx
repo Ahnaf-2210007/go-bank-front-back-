@@ -61,11 +61,11 @@ export default function RegisterPage() {
       title="Create account"
       description="Join GoBank to set up your secure banking profile and continue to email verification."
       eyebrow={
-        <div className="flex flex-wrap gap-2">
-          <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-slate-200/80">
+        <div className="flex flex-wrap gap-2 animate-entrance">
+          <span className="rounded-full border border-featured/30 bg-featured/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-featured-light animate-entrance-up">
             New customer
           </span>
-          <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-slate-200/80">
+          <span className="rounded-full border border-success/30 bg-success/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-success-light animate-entrance-up">
             Secure signup
           </span>
         </div>
@@ -79,33 +79,33 @@ export default function RegisterPage() {
         </p>
       }
     >
-      <form onSubmit={handleSubmit} className="space-y-5">
-        {error ? <Alert variant="destructive" title="Registration error">{error}</Alert> : null}
-        {success ? <Alert variant="success" title="Account created">{success}</Alert> : null}
+      <form onSubmit={handleSubmit} className="space-y-5 animate-stagger">
+        {error ? <Alert variant="destructive" title="Registration error" icon="✕">{error}</Alert> : null}
+        {success ? <Alert variant="success" title="Account created" icon="✓">{success}</Alert> : null}
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div className="space-y-2">
+        <div className="grid gap-4 sm:grid-cols-2 animate-entrance">
+          <div className="space-y-2 animate-entrance-up">
             <label htmlFor="firstName" className="text-sm font-medium text-slate-200">First name</label>
             <Input id="firstName" name="firstName" type="text" value={formData.firstName} onChange={handleChange} required placeholder="John" />
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-2 animate-entrance-up">
             <label htmlFor="lastName" className="text-sm font-medium text-slate-200">Last name</label>
             <Input id="lastName" name="lastName" type="text" value={formData.lastName} onChange={handleChange} required placeholder="Doe" />
           </div>
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-2 animate-entrance-up">
           <label htmlFor="email" className="text-sm font-medium text-slate-200">Email</label>
           <Input id="email" name="email" type="email" value={formData.email} onChange={handleChange} required placeholder="you@example.com" />
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-2 animate-entrance-up">
           <label htmlFor="password" className="text-sm font-medium text-slate-200">Password</label>
           <Input id="password" name="password" type="password" value={formData.password} onChange={handleChange} required placeholder="Create a password" />
         </div>
 
-        <Button type="submit" disabled={loading} className="w-full">
+        <Button type="submit" disabled={loading} className="w-full animate-entrance-up">
           {loading ? 'Creating Account...' : 'Create Account'}
         </Button>
       </form>

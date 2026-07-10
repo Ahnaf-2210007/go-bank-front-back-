@@ -112,48 +112,48 @@ export default function CouponPage() {
         </Button>
       }
       summary={
-        <div className="grid gap-4 md:grid-cols-3">
-          <Card className="border-white/8 bg-white/[0.03]">
-            <CardHeader className="pb-3">
+        <div className="grid gap-4 md:grid-cols-3 animate-stagger">
+          <Card variant="default" className="animate-hover-lift">
+            <CardHeader className="pb-3 border-b border-border/40 bg-gradient-to-r from-accent-secondary/10 to-transparent">
               <CardDescription>Account holder</CardDescription>
-              <CardTitle className="text-xl text-white">{account ? `${account.firstName} ${account.lastName}` : ''}</CardTitle>
+              <CardTitle className="text-xl text-accent-strong animate-entrance-up">{account ? `${account.firstName} ${account.lastName}` : ''}</CardTitle>
             </CardHeader>
           </Card>
-          <Card className="border-white/8 bg-white/[0.03]">
-            <CardHeader className="pb-3">
+          <Card variant="elevated" className="animate-hover-lift">
+            <CardHeader className="pb-3 border-b border-border/40 bg-gradient-to-r from-primary/10 to-transparent">
               <CardDescription>Account number</CardDescription>
-              <CardTitle className="text-xl tracking-[0.14em] text-white">{account?.number}</CardTitle>
+              <CardTitle className="text-xl tracking-[0.14em] text-primary-light animate-entrance-up">{account?.number}</CardTitle>
             </CardHeader>
           </Card>
-          <Card className="border-accent/15 bg-[linear-gradient(180deg,rgba(78,162,255,0.14),rgba(255,255,255,0.03))]">
-            <CardHeader className="pb-3">
+          <Card variant="featured" className="animate-hover-lift-strong">
+            <CardHeader className="pb-3 border-b border-border/40 bg-gradient-to-r from-success/10 to-transparent">
               <CardDescription>Current balance</CardDescription>
-              <CardTitle className="text-3xl text-white">${account?.balance.toFixed(2)}</CardTitle>
+              <CardTitle className="text-3xl text-success-light animate-entrance-up">${account?.balance.toFixed(2)}</CardTitle>
             </CardHeader>
           </Card>
         </div>
       }
     >
-      <div className="space-y-5">
-        <div className="grid gap-3 md:grid-cols-3">
-          <div className="rounded-2xl border border-border/60 bg-white/[0.03] p-4">
+      <div className="space-y-5 animate-stagger">
+        <div className="grid gap-3 md:grid-cols-3 animate-entrance">
+          <div className="rounded-2xl border border-border/60 bg-gradient-to-br from-white/[0.04] to-transparent p-4 hover:bg-white/[0.06] transition-colors duration-300 animate-entrance-up">
             <p className="text-xs uppercase tracking-[0.22em] text-muted">Account holder</p>
             <p className="mt-2 text-base font-semibold text-white">{account ? `${account.firstName} ${account.lastName}` : ''}</p>
           </div>
-          <div className="rounded-2xl border border-border/60 bg-white/[0.03] p-4">
+          <div className="rounded-2xl border border-border/60 bg-gradient-to-br from-white/[0.04] to-transparent p-4 hover:bg-white/[0.06] transition-colors duration-300 animate-entrance-up">
             <p className="text-xs uppercase tracking-[0.22em] text-muted">Account number</p>
             <p className="mt-2 text-base font-semibold tracking-[0.14em] text-white">{account?.number}</p>
           </div>
-          <div className="rounded-2xl border border-accent/20 bg-[linear-gradient(180deg,rgba(78,162,255,0.16),rgba(255,255,255,0.04))] p-4">
+          <div className="rounded-2xl border border-success/20 bg-gradient-to-br from-success/12 to-success/5 p-4 hover:from-success/14 hover:to-success/8 transition-all duration-300 animate-entrance-up">
             <p className="text-xs uppercase tracking-[0.22em] text-slate-200/70">Current balance</p>
-            <p className="mt-2 text-2xl font-bold text-white">${account?.balance.toFixed(2)}</p>
+            <p className="mt-2 text-2xl font-bold text-success-light">${account?.balance.toFixed(2)}</p>
           </div>
         </div>
 
-        {error ? <Alert variant="destructive" title="Coupon error">{error}</Alert> : null}
-        {success ? <Alert variant="success" title="Coupon applied">{success}</Alert> : null}
+        {error ? <Alert variant="destructive" title="Coupon error" icon="✕">{error}</Alert> : null}
+        {success ? <Alert variant="success" title="Coupon applied" icon="✓">{success}</Alert> : null}
 
-        <form id="coupon-form" onSubmit={submit} className="space-y-4">
+        <form id="coupon-form" onSubmit={submit} className="space-y-4 animate-entrance-up">
           <div className="space-y-2">
             <label htmlFor="couponCode" className="text-sm font-medium text-slate-200">Coupon code</label>
             <Input

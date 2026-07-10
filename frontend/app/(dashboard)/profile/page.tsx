@@ -242,30 +242,30 @@ export default function ProfilePage() {
         </Button>
       }
       summary={
-        <div className="grid gap-4 md:grid-cols-3">
-          <Card className="border-white/8 bg-white/[0.03]">
-            <CardHeader className="pb-3">
+        <div className="grid gap-4 md:grid-cols-3 animate-stagger">
+          <Card variant="default" className="animate-hover-lift">
+            <CardHeader className="pb-3 border-b border-border/40 bg-gradient-to-r from-primary/10 to-transparent">
               <CardDescription>Account holder</CardDescription>
-              <CardTitle className="text-xl text-white">{account ? `${account.firstName} ${account.lastName}` : ''}</CardTitle>
+              <CardTitle className="text-xl text-primary-light animate-entrance-up">{account ? `${account.firstName} ${account.lastName}` : ''}</CardTitle>
             </CardHeader>
           </Card>
-          <Card className="border-white/8 bg-white/[0.03]">
-            <CardHeader className="pb-3">
+          <Card variant="elevated" className="animate-hover-lift">
+            <CardHeader className="pb-3 border-b border-border/40 bg-gradient-to-r from-accent-secondary/10 to-transparent">
               <CardDescription>Account number</CardDescription>
-              <CardTitle className="text-xl tracking-[0.14em] text-white">{account?.number}</CardTitle>
+              <CardTitle className="text-xl tracking-[0.14em] text-accent-strong animate-entrance-up">{account?.number}</CardTitle>
             </CardHeader>
           </Card>
-          <Card className="border-accent/15 bg-[linear-gradient(180deg,rgba(78,162,255,0.14),rgba(255,255,255,0.03))]">
-            <CardHeader className="pb-3">
+          <Card variant={account?.hasPasskey ? 'featured' : 'gradient'} className="animate-hover-lift-strong">
+            <CardHeader className="pb-3 border-b border-border/40 bg-gradient-to-r from-accent/10 to-transparent">
               <CardDescription>Email</CardDescription>
-              <CardTitle className="text-lg text-white">{account?.email}</CardTitle>
+              <CardTitle className="text-lg text-accent animate-entrance-up">{account?.email}</CardTitle>
             </CardHeader>
           </Card>
         </div>
       }
     >
-      <div className="space-y-6">
-        <Card className={`border-accent/15 ${account?.hasPasskey ? 'bg-[linear-gradient(180deg,rgba(34,197,94,0.12),rgba(255,255,255,0.03))]' : 'bg-[linear-gradient(180deg,rgba(78,162,255,0.12),rgba(255,255,255,0.03))]'}`}>
+      <div className="space-y-6 animate-stagger">
+        <Card className={`border-0 transition-all duration-300 ${account?.hasPasskey ? 'bg-gradient-to-br from-success/10 via-surface/50 to-success/5' : 'bg-gradient-to-br from-primary/10 via-surface/50 to-primary/5'}`}>
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <div>
@@ -302,11 +302,11 @@ export default function ProfilePage() {
           </CardContent>
         </Card>
 
-        <form id="profile-form" onSubmit={submit} className="space-y-5">
-          {error ? <Alert variant="destructive" title="Update error">{error}</Alert> : null}
-          {message ? <Alert variant="success" title="Update status">{message}</Alert> : null}
+        <form id="profile-form" onSubmit={submit} className="space-y-5 animate-entrance-up">
+          {error ? <Alert variant="destructive" title="Update error" icon="✕">{error}</Alert> : null}
+          {message ? <Alert variant="success" title="Update status" icon="✓">{message}</Alert> : null}
 
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-4 md:grid-cols-2 animate-stagger">
             <div className="space-y-2">
               <label className="text-sm font-medium text-slate-200">Action</label>
               <select
