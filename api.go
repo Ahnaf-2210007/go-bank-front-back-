@@ -413,16 +413,16 @@ func sendTransferNotificationEmail(email string, isRecipient bool, personName, o
 	var amountColor string = "#059669"
 
 	if isRecipient {
-		subject = fmt.Sprintf("Payment Received - $%.2f from %s", float64(transfer.Amount)/100.0, otherPersonName)
+		subject = fmt.Sprintf("Payment Received - $%.2f from %s", float64(transfer.Amount), otherPersonName)
 		greeting = fmt.Sprintf("Hello %s,", personName)
-		actionText = fmt.Sprintf("You have received a transfer of <strong style=\"color: %s;\">$%.2f</strong> from %s.", amountColor, float64(transfer.Amount)/100.0, otherPersonName)
+		actionText = fmt.Sprintf("You have received a transfer of <strong style=\"color: %s;\">$%.2f</strong> from %s.", amountColor, float64(transfer.Amount), otherPersonName)
 	} else {
-		subject = fmt.Sprintf("Transfer Complete - $%.2f sent to %s", float64(transfer.Amount)/100.0, otherPersonName)
+		subject = fmt.Sprintf("Transfer Complete - $%.2f sent to %s", float64(transfer.Amount), otherPersonName)
 		greeting = fmt.Sprintf("Hello %s,", personName)
-		actionText = fmt.Sprintf("You have successfully transferred <strong style=\"color: %s;\">$%.2f</strong> to %s.", amountColor, float64(transfer.Amount)/100.0, otherPersonName)
+		actionText = fmt.Sprintf("You have successfully transferred <strong style=\"color: %s;\">$%.2f</strong> to %s.", amountColor, float64(transfer.Amount), otherPersonName)
 	}
 
-	formattedAmount := fmt.Sprintf("$%.2f", float64(transfer.Amount)/100.0)
+	formattedAmount := fmt.Sprintf("$%.2f", float64(transfer.Amount))
 	formattedDate := transfer.CreatedAt.Format("January 2, 2006 at 3:04 PM MST")
 
 	htmlBody := fmt.Sprintf(`<!DOCTYPE html>
@@ -833,23 +833,23 @@ func (s *APIServer) handleGetActivity(w http.ResponseWriter, r *http.Request) er
 				if recipientName == "" {
 					recipientName = maskedAccountNumber(toAcc.Number)
 				}
-				eventType = "transfer_sent"
-				title = fmt.Sprintf("Sent $%.2f to %s", float64(tx.Amount)/100.0, recipientName)
-				details = fmt.Sprintf("Transfer ID: %s", tx.TransactionID)
-				amount = tx.Amount
-			} else {
-				// This user received the transfer
-				fromAcc, err := s.store.GetAccountByID(tx.FromAccountID)
-				if err != nil {
-					log.Printf("could not fetch sender account %d: %v", tx.FromAccountID, err)
-					continue
-				}
-				senderName := strings.TrimSpace(fromAcc.FirstName + " " + fromAcc.LastName)
-				if senderName == "" {
-					senderName = maskedAccountNumber(fromAcc.Number)
-				}
-				eventType = "transfer_received"
-				title = fmt.Sprintf("Received $%.2f from %s", float64(tx.Amount)/100.0, senderName)
+			eventType = "transfer_sent"
+			title = fmt.Sprintf("Sent $%.2f to %s", float64(tx.Amount), recipientName)
+			details = fmt.Sprintf("Transfer ID: %s", tx.TransactionID)
+			amount = tx.Amount
+		} else {
+			// This user received the transfer
+			fromAcc, err := s.store.GetAccountByID(tx.FromAccountID)
+			if err != nil {
+				log.Printf("could not fetch sender account %d: %v", tx.FromAccountID, err)
+				continue
+			}
+			senderName := strings.TrimSpace(fromAcc.FirstName + " " + fromAcc.LastName)
+			if senderName == "" {
+				senderName = maskedAccountNumber(fromAcc.Number)
+			}
+			eventType = "transfer_received"
+			title = fmt.Sprintf("Received $%.2f from %s", float64(tx.Amount), senderName)
 				details = fmt.Sprintf("Transfer ID: %s", tx.TransactionID)
 				amount = tx.Amount
 			}
