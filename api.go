@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/mail"
 	"net/smtp"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -50,6 +51,7 @@ func (s *APIServer) Run() {
 	router.HandleFunc("/account/verification", makeHTTPHandlerFunc(s.handleVerification))
 	router.HandleFunc("/account/update", makeHTTPHandlerFunc(s.handleUpdateAccount))
 	router.HandleFunc("/account/transactions", makeHTTPHandlerFunc(s.handleGetTransactions))
+	router.HandleFunc("/account/activity", makeHTTPHandlerFunc(s.handleGetActivity))
 	router.HandleFunc("/account/{id}", withJWTAuth(makeHTTPHandlerFunc(s.handleGetAccountByID), s.store, s.cfg.JWTSecret))
 	router.HandleFunc("/account/{id}/offer", withJWTAuth(makeHTTPHandlerFunc(s.handleOffer), s.store, s.cfg.JWTSecret))
 	router.HandleFunc("/transfer", makeHTTPHandlerFunc(s.handleTransfer))
@@ -390,7 +392,7 @@ func generateTransactionID() (string, error) {
 	return fmt.Sprintf("TXN-%012d", n.Int64()), nil
 }
 
-func sendTransferNotificationEmail(email, subject string, lines []string, transfer *TransferResult, cfg *Config) error {
+func sendTransferNotificationEmail(email string, isRecipient bool, recipientName, senderName string, transfer *TransferResult, recipient *Account, cfg *Config) error {
 	if strings.TrimSpace(email) == "" {
 		log.Printf("transfer notification skipped for transaction %s: missing recipient email", transfer.TransactionID)
 		return nil
@@ -407,20 +409,115 @@ func sendTransferNotificationEmail(email, subject string, lines []string, transf
 		return nil
 	}
 
-	host := cfg.SMTPHost
-	port := cfg.SMTPPort
-	addr := host + ":" + port
-	auth := smtp.PlainAuth("", cfg.SMTPEmail, cfg.SMTPPassword, host)
+	var subject, greeting, actionText string
+	var amountColor string = "#059669"
+
+	if isRecipient {
+		subject = fmt.Sprintf("Payment Received - $%.2f from %s", float64(transfer.Amount)/100.0, senderName)
+		greeting = fmt.Sprintf("Hello %s,", recipientName)
+		actionText = fmt.Sprintf("You have received a transfer of <strong style=\"color: %s;\">$%.2f</strong> from %s.", amountColor, float64(transfer.Amount)/100.0, senderName)
+	} else {
+		subject = fmt.Sprintf("Transfer Complete - $%.2f sent to %s", float64(transfer.Amount)/100.0, recipientName)
+		greeting = fmt.Sprintf("Hello %s,", senderName)
+		actionText = fmt.Sprintf("You have successfully transferred <strong style=\"color: %s;\">$%.2f</strong> to %s.", amountColor, float64(transfer.Amount)/100.0, recipientName)
+	}
+
+	formattedAmount := fmt.Sprintf("$%.2f", float64(transfer.Amount)/100.0)
+	formattedDate := transfer.CreatedAt.Format("January 2, 2006 at 3:04 PM MST")
+
+	htmlBody := fmt.Sprintf(`<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif; background: #f5f5f5; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .header { background: linear-gradient(135deg, #4ea2ff 0%%, #0066cc 100%%); padding: 40px 20px; text-align: center; color: white; }
+        .logo { font-size: 24px; font-weight: bold; margin-bottom: 8px; }
+        .tagline { font-size: 13px; opacity: 0.9; }
+        .content { padding: 40px 30px; }
+        .greeting { font-size: 18px; font-weight: 600; color: #1a1a1a; margin-bottom: 20px; }
+        .action-text { font-size: 15px; color: #333; line-height: 1.6; margin-bottom: 30px; }
+        .transaction-box { background: #f9fafb; border-left: 4px solid #4ea2ff; padding: 20px; border-radius: 6px; margin: 20px 0; }
+        .transaction-item { display: flex; justify-content: space-between; margin: 12px 0; font-size: 14px; }
+        .transaction-label { color: #666; font-weight: 500; }
+        .transaction-value { color: #1a1a1a; font-weight: 600; }
+        .amount-display { font-size: 28px; font-weight: 700; color: #059669; margin: 15px 0; text-align: center; }
+        .reference-box { background: #f0f4ff; border: 1px solid #dde7ff; border-radius: 6px; padding: 12px; margin: 15px 0; }
+        .reference-label { font-size: 12px; color: #666; text-transform: uppercase; letter-spacing: 0.5px; }
+        .reference-value { font-size: 13px; color: #1a1a1a; font-family: 'Courier New', monospace; font-weight: 600; margin-top: 4px; word-break: break-all; }
+        .info-box { background: #fffbf0; border-left: 4px solid #ff9800; padding: 15px; margin: 20px 0; border-radius: 4px; }
+        .info-box p { margin: 8px 0; font-size: 13px; color: #555; }
+        .info-box strong { color: #ff9800; }
+        .cta-button { display: inline-block; background: #4ea2ff; color: white; padding: 12px 30px; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 14px; margin: 20px 0; text-align: center; }
+        .footer { background: #f5f5f5; padding: 20px 30px; border-top: 1px solid #eee; font-size: 12px; color: #999; text-align: center; }
+        .footer a { color: #4ea2ff; text-decoration: none; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div class="logo">GoBank</div>
+        <div class="tagline">Secure Banking Services</div>
+    </div>
+    
+    <div class="content">
+        <p class="greeting">%s</p>
+        
+        <p class="action-text">%s</p>
+        
+        <div class="transaction-box">
+            <div class="transaction-item">
+                <span class="transaction-label">Transaction ID:</span>
+                <span class="transaction-value">%s</span>
+            </div>
+            <div class="transaction-item">
+                <span class="transaction-label">Amount:</span>
+                <span class="transaction-value">%s</span>
+            </div>
+            <div class="transaction-item">
+                <span class="transaction-label">Date & Time:</span>
+                <span class="transaction-value">%s</span>
+            </div>
+        </div>
+        
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="#" class="cta-button">View Account Details</a>
+        </div>
+        
+        <div class="info-box">
+            <p><strong>🔒 Security Note:</strong> This is an automated notification from GoBank. Please do not reply to this email. For security inquiries, log in to your account or contact our support team.</p>
+        </div>
+        
+        <p style="font-size: 13px; color: #666; margin-top: 20px;">
+            <strong>Questions?</strong><br>
+            If you don't recognize this transaction or have concerns, please <a href="#" style="color: #4ea2ff; text-decoration: none;">contact our support team</a> immediately.
+        </p>
+    </div>
+    
+    <div class="footer">
+        <p>© 2024 GoBank. All rights reserved.</p>
+        <p><a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a> | <a href="#">Contact Us</a></p>
+    </div>
+</div>
+</body>
+</html>`, greeting, actionText, transfer.TransactionID, formattedAmount, formattedDate)
 
 	msg := strings.Join([]string{
 		"From: " + cfg.SMTPEmail,
 		"To: " + email,
 		"Subject: " + subject,
 		"MIME-Version: 1.0",
-		"Content-Type: text/plain; charset=\"UTF-8\"",
+		"Content-Type: text/html; charset=\"UTF-8\"",
 		"",
 	}, "\r\n")
-	msg += "\r\n" + strings.Join(lines, "\r\n")
+	msg += "\r\n" + htmlBody
+
+	host := cfg.SMTPHost
+	port := cfg.SMTPPort
+	addr := host + ":" + port
+	auth := smtp.PlainAuth("", cfg.SMTPEmail, cfg.SMTPPassword, host)
 
 	if err := smtp.SendMail(addr, auth, cfg.SMTPEmail, []string{email}, []byte(msg)); err != nil {
 		return err
@@ -668,6 +765,131 @@ func (s *APIServer) handleGetTransactions(w http.ResponseWriter, r *http.Request
 	return WriteJSON(w, http.StatusOK, transactions)
 }
 
+// ActivityEvent represents a single event in the user's activity timeline.
+// It includes transactions, profile updates, and passkey registrations.
+type ActivityEvent struct {
+	Type      string    `json:"type"`      // "transfer_sent", "transfer_received", "profile_update", "passkey_registered", "account_created"
+	Title     string    `json:"title"`
+	Details   string    `json:"details"`
+	Amount    int64     `json:"amount,omitempty"`    // For transfers only
+	Status    string    `json:"status"`    // "completed", "pending", "synced"
+	Timestamp time.Time `json:"timestamp"`
+}
+
+// handleGetActivity handles GET /account/activity.
+// It returns recent activity events for the authenticated user, including transfers and profile changes.
+func (s *APIServer) handleGetActivity(w http.ResponseWriter, r *http.Request) error {
+	if r.Method != "GET" {
+		return fmt.Errorf("method not allowed %s", r.Method)
+	}
+
+	tokenString := r.Header.Get("Authorization")
+	token, err := validateJWT(tokenString, s.cfg.JWTSecret)
+	if err != nil || !token.Valid {
+		WriteJSON(w, http.StatusUnauthorized, ApiError{Error: "not authorized"})
+		return nil
+	}
+
+	claims := token.Claims.(jwt.MapClaims)
+	accountNumber := int64(claims["accountNumber"].(float64))
+
+	acc, err := s.store.GetAccountByNumber(accountNumber)
+	if err != nil {
+		WriteJSON(w, http.StatusUnauthorized, ApiError{Error: "not authorized"})
+		return nil
+	}
+
+	// Get the 10 most recent transactions (transfers)
+	transactions, err := s.store.GetTransactionHistory(acc.ID, 10, 0, "", 0)
+	if err != nil {
+		return err
+	}
+
+	var events []ActivityEvent
+
+	// Add account created event
+	events = append(events, ActivityEvent{
+		Type:      "account_created",
+		Title:     "Account Created",
+		Details:   fmt.Sprintf("Your GoBank account was created and verified"),
+		Status:    "completed",
+		Timestamp: acc.CreatedAt,
+	})
+
+	// Process transactions into activity events
+	for _, tx := range transactions {
+		if tx.TransactionType == "transfer" {
+			var eventType, title, details string
+			var amount int64
+
+			if tx.FromAccountID == acc.ID {
+				// This user sent the transfer
+				toAcc, err := s.store.GetAccountByID(tx.ToAccountID)
+				if err != nil {
+					log.Printf("could not fetch recipient account %d: %v", tx.ToAccountID, err)
+					continue
+				}
+				recipientName := strings.TrimSpace(toAcc.FirstName + " " + toAcc.LastName)
+				if recipientName == "" {
+					recipientName = maskedAccountNumber(toAcc.Number)
+				}
+				eventType = "transfer_sent"
+				title = fmt.Sprintf("Sent $%.2f to %s", float64(tx.Amount)/100.0, recipientName)
+				details = fmt.Sprintf("Transfer ID: %s", tx.TransactionID)
+				amount = tx.Amount
+			} else {
+				// This user received the transfer
+				fromAcc, err := s.store.GetAccountByID(tx.FromAccountID)
+				if err != nil {
+					log.Printf("could not fetch sender account %d: %v", tx.FromAccountID, err)
+					continue
+				}
+				senderName := strings.TrimSpace(fromAcc.FirstName + " " + fromAcc.LastName)
+				if senderName == "" {
+					senderName = maskedAccountNumber(fromAcc.Number)
+				}
+				eventType = "transfer_received"
+				title = fmt.Sprintf("Received $%.2f from %s", float64(tx.Amount)/100.0, senderName)
+				details = fmt.Sprintf("Transfer ID: %s", tx.TransactionID)
+				amount = tx.Amount
+			}
+
+			events = append(events, ActivityEvent{
+				Type:      eventType,
+				Title:     title,
+				Details:   details,
+				Amount:    amount,
+				Status:    tx.Status,
+				Timestamp: tx.CreatedAt,
+			})
+		}
+	}
+
+	// Check if account has passkey and add event if it was recently created
+	// (This is a simplified check; in a production system you'd track passkey registration times)
+	if acc.HasPasskey {
+		events = append(events, ActivityEvent{
+			Type:      "passkey_registered",
+			Title:     "Passkey Registered",
+			Details:   "A passkey has been registered for secure login",
+			Status:    "completed",
+			Timestamp: acc.CreatedAt.Add(1 * time.Minute), // Placeholder - ideally we'd track this
+		})
+	}
+
+	// Sort events by timestamp descending (newest first)
+	sort.Slice(events, func(i, j int) bool {
+		return events[i].Timestamp.After(events[j].Timestamp)
+	})
+
+	// Return only the 5 most recent events for the dashboard preview
+	if len(events) > 5 {
+		events = events[:5]
+	}
+
+	return WriteJSON(w, http.StatusOK, events)
+}
+
 // parseMonth converts a month string (number 1-12 or English name) to its
 // numeric representation (1-12). Returns 0 if the value cannot be parsed.
 func parseMonth(m string) int {
@@ -909,35 +1131,18 @@ func (s *APIServer) handleTransfer(w http.ResponseWriter, r *http.Request) error
 		recipientName = maskedAccountNumber(toAcc.Number)
 	}
 
-	senderLines := []string{
-		fmt.Sprintf("Hello %s,", senderName),
-		"",
-		"Your transfer has been completed successfully.",
-		fmt.Sprintf("Transaction ID: %s", transfer.TransactionID),
-		fmt.Sprintf("Recipient: %s", recipientName),
-		fmt.Sprintf("Amount: %d", transfer.Amount),
-		fmt.Sprintf("Date: %s", transfer.CreatedAt.Format(time.RFC1123Z)),
-	}
-
-	recipientLines := []string{
-		fmt.Sprintf("Hello %s,", recipientName),
-		"",
-		"You have received a transfer successfully.",
-		fmt.Sprintf("Transaction ID: %s", transfer.TransactionID),
-		fmt.Sprintf("Sender: %s", senderName),
-		fmt.Sprintf("Amount: %d", transfer.Amount),
-		fmt.Sprintf("Date: %s", transfer.CreatedAt.Format(time.RFC1123Z)),
-	}
-
-	go func(sender, recipient *Account, result *TransferResult, senderBody, recipientBody []string, cfg *Config) {
-		if err := sendTransferNotificationEmail(sender.Email, "GoBank Transfer Receipt", senderBody, result, cfg); err != nil {
+	// Send emails asynchronously
+	go func(sender, recipient *Account, result *TransferResult, cfg *Config) {
+		// Send sender (payer) notification
+		if err := sendTransferNotificationEmail(sender.Email, false, senderName, recipientName, result, recipient, cfg); err != nil {
 			log.Printf("failed to send sender receipt for transaction %s: %v", result.TransactionID, err)
 		}
 
-		if err := sendTransferNotificationEmail(recipient.Email, "GoBank Incoming Transfer", recipientBody, result, cfg); err != nil {
+		// Send recipient (payee) notification
+		if err := sendTransferNotificationEmail(recipient.Email, true, recipientName, senderName, result, recipient, cfg); err != nil {
 			log.Printf("failed to send recipient receipt for transaction %s: %v", result.TransactionID, err)
 		}
-	}(fromAcc, toAcc, transfer, senderLines, recipientLines, s.cfg)
+	}(fromAcc, toAcc, transfer, s.cfg)
 
 	return WriteJSON(w, http.StatusOK, map[string]any{
 		"status":        "transfer successful",

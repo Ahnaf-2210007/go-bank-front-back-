@@ -62,6 +62,15 @@ export interface TransactionRecord {
   createdAt: string;
 }
 
+export interface ActivityEvent {
+  type: 'transfer_sent' | 'transfer_received' | 'profile_update' | 'passkey_registered' | 'account_created';
+  title: string;
+  details: string;
+  amount?: number;
+  status: string;
+  timestamp: string;
+}
+
 export interface OfferRequest {
   couponCode: string;
 }
