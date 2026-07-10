@@ -108,32 +108,32 @@ export default function HistoryPage() {
         </Button>
       }
       summary={
-        <div className="grid gap-4 md:grid-cols-3">
-          <Card className="border-white/8 bg-white/[0.03]">
-            <CardHeader className="pb-3">
+        <div className="grid gap-4 md:grid-cols-3 animate-stagger">
+          <Card variant="elevated" className="animate-hover-lift">
+            <CardHeader className="pb-3 border-b border-border/40 bg-gradient-to-r from-primary/10 to-transparent">
               <CardDescription>Rows per page</CardDescription>
-              <CardTitle className="text-3xl text-white">{filters.limit}</CardTitle>
+              <CardTitle className="text-3xl text-primary-light animate-entrance-up">{filters.limit}</CardTitle>
             </CardHeader>
           </Card>
-          <Card className="border-white/8 bg-white/[0.03]">
-            <CardHeader className="pb-3">
+          <Card variant="default" className="animate-hover-lift">
+            <CardHeader className="pb-3 border-b border-border/40 bg-gradient-to-r from-accent-secondary/10 to-transparent">
               <CardDescription>Current offset</CardDescription>
-              <CardTitle className="text-3xl text-white">{filters.offset}</CardTitle>
+              <CardTitle className="text-3xl text-accent-strong animate-entrance-up">{filters.offset}</CardTitle>
             </CardHeader>
           </Card>
-          <Card className="border-accent/15 bg-[linear-gradient(180deg,rgba(78,162,255,0.14),rgba(255,255,255,0.03))]">
-            <CardHeader className="pb-3">
+          <Card variant="featured" className="animate-hover-lift-strong">
+            <CardHeader className="pb-3 border-b border-border/40 bg-gradient-to-r from-featured/10 to-transparent">
               <CardDescription>Loaded records</CardDescription>
-              <CardTitle className="text-3xl text-white">{records.length}</CardTitle>
+              <CardTitle className="text-3xl text-featured animate-entrance-up">{records.length}</CardTitle>
             </CardHeader>
           </Card>
         </div>
       }
     >
-      <div className="space-y-5">
-        {error ? <Alert variant="destructive" title="History error">{error}</Alert> : null}
+      <div className="space-y-5 animate-stagger">
+        {error ? <Alert variant="destructive" title="History error" icon="✕">{error}</Alert> : null}
 
-        <div className="grid gap-4 lg:grid-cols-[1.4fr_1fr_1fr_1fr_auto]">
+        <div className="grid gap-4 lg:grid-cols-[1.4fr_1fr_1fr_1fr_auto] animate-entrance-up">
           <div className="space-y-2">
             <label htmlFor="type" className="text-sm font-medium text-slate-200">Transaction type</label>
             <Input
@@ -183,16 +183,16 @@ export default function HistoryPage() {
         </div>
 
         {loading ? (
-          <div className="rounded-[1.25rem] border border-border/60 p-6 text-sm text-muted">Loading transactions...</div>
+          <div className="rounded-[1.25rem] border border-border/50 bg-gradient-to-r from-primary/5 to-transparent p-6 text-sm text-muted animate-pulse-smooth">Loading transactions...</div>
         ) : records.length === 0 ? (
           <EmptyState
             title="No activity found"
             description="Try widening the filters or loading another month."
-            icon={<span className="text-2xl">⌁</span>}
+            icon={<span className="text-2xl animate-pulse-smooth">⌁</span>}
           />
         ) : (
-          <div className="overflow-hidden rounded-[1.25rem] border border-border/60 bg-white/[0.02]">
-            <Table>
+          <div className="overflow-hidden rounded-[1.25rem] border border-border/50 bg-gradient-to-b from-white/[0.04] to-transparent animate-entrance">
+            <Table variant="striped">
               <TableHeader>
                 <TableRow>
                   <TableHead>Date</TableHead>

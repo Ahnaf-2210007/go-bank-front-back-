@@ -145,47 +145,47 @@ export default function TransferPage() {
         </Button>
       }
       summary={
-        <div className="grid gap-4 md:grid-cols-3">
-          <Card className="border-accent/15 bg-white/[0.03]">
-            <CardHeader className="pb-3">
+        <div className="grid gap-4 md:grid-cols-3 animate-stagger">
+          <Card variant="featured" className="animate-hover-lift-strong">
+            <CardHeader className="pb-3 border-b border-border/40 bg-gradient-to-r from-success/10 to-transparent">
               <CardDescription>Current balance</CardDescription>
-              <CardTitle className="text-3xl text-white">${account?.balance.toFixed(2)}</CardTitle>
+              <CardTitle className="text-3xl text-success-light animate-entrance-up">${account?.balance.toFixed(2)}</CardTitle>
             </CardHeader>
           </Card>
-          <Card className="border-white/8 bg-white/[0.03]">
-            <CardHeader className="pb-3">
+          <Card variant="elevated" className="animate-hover-lift">
+            <CardHeader className="pb-3 border-b border-border/40 bg-gradient-to-r from-primary/10 to-transparent">
               <CardDescription>Account number</CardDescription>
-              <CardTitle className="text-xl tracking-[0.14em] text-white">{account?.number}</CardTitle>
+              <CardTitle className="text-xl tracking-[0.14em] text-primary-light animate-entrance-up">{account?.number}</CardTitle>
             </CardHeader>
           </Card>
-          <Card className="border-white/8 bg-white/[0.03]">
-            <CardHeader className="pb-3">
+          <Card variant="gradient" className="animate-hover-lift">
+            <CardHeader className="pb-3 border-b border-border/40 bg-gradient-to-r from-accent-secondary/10 to-transparent">
               <CardDescription>Account holder</CardDescription>
-              <CardTitle className="text-xl text-white">{account ? `${account.firstName} ${account.lastName}` : ''}</CardTitle>
+              <CardTitle className="text-xl text-accent-strong animate-entrance-up">{account ? `${account.firstName} ${account.lastName}` : ''}</CardTitle>
             </CardHeader>
           </Card>
         </div>
       }
     >
-      <div className="space-y-5">
-        <div className="flex flex-wrap items-center gap-2">
-          <Badge variant="default">Transfer funds</Badge>
+      <div className="space-y-5 animate-stagger">
+        <div className="flex flex-wrap items-center gap-2 animate-entrance">
+          <Badge variant="gradient">Transfer funds</Badge>
           <Badge variant="outline">Positive amounts only</Badge>
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-2 animate-entrance-up">
           <h2 className="text-2xl font-semibold tracking-tight text-white">Send money securely</h2>
           <p className="max-w-2xl text-sm leading-6 text-slate-200/75">
-            Transfer to another GoBank account using the backend transfer endpoint.
+            Transfer to another GoBank account with instant validation and confirmation.
           </p>
         </div>
 
-        <form id="transfer-form" onSubmit={handleSubmit} className="space-y-5">
-          {error ? <Alert variant="destructive" title="Transfer error">{error}</Alert> : null}
-          {success ? <Alert variant="success" title="Transfer complete">{success}</Alert> : null}
+        <form id="transfer-form" onSubmit={handleSubmit} className="space-y-5 animate-entrance-up">
+          {error ? <Alert variant="destructive" title="Transfer error" icon="⚠️">{error}</Alert> : null}
+          {success ? <Alert variant="success" title="Transfer complete" icon="✓">{success}</Alert> : null}
 
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-2">
+          <div className="grid gap-4 md:grid-cols-2 animate-stagger">
+            <div className="space-y-2 animate-entrance-up">
               <label htmlFor="toAccount" className="text-sm font-medium text-slate-200">Recipient account number</label>
               <Input
                 id="toAccount"
@@ -198,7 +198,7 @@ export default function TransferPage() {
               />
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 animate-entrance-up">
               <label htmlFor="amount" className="text-sm font-medium text-slate-200">Amount</label>
               <Input
                 id="amount"
