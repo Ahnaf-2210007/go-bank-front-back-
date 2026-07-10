@@ -135,11 +135,11 @@ export default function LoginPage() {
       title="Welcome back"
       description="Sign in to your GoBank account and continue to your protected banking dashboard."
       eyebrow={
-        <div className="flex flex-wrap gap-2">
-          <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-slate-200/80">
+        <div className="flex flex-wrap gap-2 animate-entrance">
+          <span className="rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-primary-light animate-entrance-up">
             Secure login
           </span>
-          <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-slate-200/80">
+          <span className="rounded-full border border-accent/30 bg-accent/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-accent-strong animate-entrance-up">
             JWT session
           </span>
         </div>
@@ -162,10 +162,10 @@ export default function LoginPage() {
         </div>
       }
     >
-      <form onSubmit={handleSubmit} className="space-y-5">
-        {error ? <Alert variant="destructive" title="Login error">{error}</Alert> : null}
+      <form onSubmit={handleSubmit} className="space-y-5 animate-stagger">
+        {error ? <Alert variant="destructive" title="Login error" icon="⚠️">{error}</Alert> : null}
 
-        <div className="space-y-2">
+        <div className="space-y-2 animate-entrance-up">
           <label htmlFor="number" className="text-sm font-medium text-slate-200">
             Account number
           </label>
@@ -181,7 +181,7 @@ export default function LoginPage() {
           />
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-2 animate-entrance-up">
           <label htmlFor="password" className="text-sm font-medium text-slate-200">
             Password
           </label>
@@ -196,7 +196,7 @@ export default function LoginPage() {
           />
         </div>
 
-        <div className="space-y-2 rounded-2xl border border-white/8 bg-white/[0.03] p-4">
+        <div className="space-y-2 rounded-2xl border border-primary/30 bg-gradient-to-r from-primary/10 to-transparent p-4 animate-entrance-up">
           <label htmlFor="passkeyEmail" className="text-sm font-medium text-slate-200">
             Passkey email
           </label>
@@ -213,18 +213,18 @@ export default function LoginPage() {
           </p>
         </div>
 
-        <Button type="submit" disabled={loading} className="w-full">
+        <Button type="submit" disabled={loading} className="w-full animate-entrance-up">
           {loading ? 'Signing in...' : 'Sign In'}
         </Button>
 
-        <div className="space-y-3">
+        <div className="space-y-3 animate-entrance-up">
           <div className="relative flex items-center py-1">
-            <div className="h-px flex-1 bg-white/10" />
-            <span className="px-3 text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-300/70">or use a passkey</span>
-            <div className="h-px flex-1 bg-white/10" />
+            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
+            <span className="px-3 text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">or use a passkey</span>
+            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
           </div>
 
-          <Button type="button" variant="secondary" className="w-full" onClick={handlePasskeyLogin} disabled={passkeyLoading}>
+          <Button type="button" variant="secondary" className="w-full hover:bg-surface-strong/80" onClick={handlePasskeyLogin} disabled={passkeyLoading}>
             {passkeyLoading ? 'Starting passkey login...' : 'Sign In with Passkey'}
           </Button>
         </div>
