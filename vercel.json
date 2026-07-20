@@ -1,0 +1,11 @@
+{
+  "buildCommand": "cd backend && go mod download",
+  "devCommand": "cd backend && go run . --seed",
+  "framework": "go",
+  "rewrites": [
+    {
+      "source": "/api/:match*",
+      "destination": "/api/handler.go"
+    }
+  ]
+}
