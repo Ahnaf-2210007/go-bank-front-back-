@@ -1,11 +1,7 @@
 {
-  "buildCommand": "cd backend && go mod download",
-  "devCommand": "cd backend && go run . --seed",
-  "framework": "go",
-  "rewrites": [
-    {
-      "source": "/api/:match*",
-      "destination": "/api/handler.go"
-    }
-  ]
+  "buildCommand": "cd frontend && npm run build",
+  "devCommand": "cd frontend && npm run dev",
+  "framework": "nextjs",
+  "regions": ["iad1"],
+  "env": ["AI_GATEWAY_API_KEY"]
 }
