@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { auth } from '@/lib/auth';
 import { api, AccountResponse } from '@/lib/api';
 import { Alert } from '@/components/ui/alert';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';

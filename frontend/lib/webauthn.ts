@@ -1,3 +1,5 @@
+import type { PublicKeyCredentialCreationOptionsJSON, PublicKeyCredentialRequestOptionsJSON } from './types';
+
 const textEncoder = new TextEncoder();
 const textDecoder = new TextDecoder();
 
@@ -33,8 +35,8 @@ export function unsupportedWebauthnMessage() {
   return 'This browser does not support passkeys or WebAuthn. Use your password to continue.';
 }
 
-export function normalizeRegistrationOptions(options: any): PublicKeyCredentialCreationOptions {
-  const publicKey = options?.publicKey ?? options;
+export function normalizeRegistrationOptions(options: PublicKeyCredentialCreationOptionsJSON): PublicKeyCredentialCreationOptions {
+  const publicKey = options.publicKey;
 
   return {
     ...publicKey,
@@ -46,7 +48,7 @@ export function normalizeRegistrationOptions(options: any): PublicKeyCredentialC
         }
       : undefined,
     excludeCredentials: Array.isArray(publicKey.excludeCredentials)
-      ? publicKey.excludeCredentials.map((credential: any) => ({
+      ? publicKey.excludeCredentials.map((credential) => ({
           ...credential,
           id: base64UrlToBuffer(credential.id),
         }))
@@ -54,14 +56,14 @@ export function normalizeRegistrationOptions(options: any): PublicKeyCredentialC
   } as PublicKeyCredentialCreationOptions;
 }
 
-export function normalizeLoginOptions(options: any): PublicKeyCredentialRequestOptions {
-  const publicKey = options?.publicKey ?? options;
+export function normalizeLoginOptions(options: PublicKeyCredentialRequestOptionsJSON): PublicKeyCredentialRequestOptions {
+  const publicKey = options.publicKey;
 
   return {
     ...publicKey,
     challenge: base64UrlToBuffer(publicKey.challenge),
     allowCredentials: Array.isArray(publicKey.allowCredentials)
-      ? publicKey.allowCredentials.map((credential: any) => ({
+      ? publicKey.allowCredentials.map((credential) => ({
           ...credential,
           id: base64UrlToBuffer(credential.id),
         }))
@@ -69,7 +71,7 @@ export function normalizeLoginOptions(options: any): PublicKeyCredentialRequestO
   } as PublicKeyCredentialRequestOptions;
 }
 
-export function normalizeLoginOptionsWithoutAllowList(options: any): PublicKeyCredentialRequestOptions {
+export function normalizeLoginOptionsWithoutAllowList(options: PublicKeyCredentialRequestOptionsJSON): PublicKeyCredentialRequestOptions {
   const normalized = normalizeLoginOptions(options);
 
   return {
