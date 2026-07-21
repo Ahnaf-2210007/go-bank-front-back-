@@ -1,14 +1,16 @@
-import type { HTMLAttributes, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { cx } from './utils';
 
 type AlertVariant = 'default' | 'success' | 'warning' | 'destructive' | 'info';
 
-export interface AlertProps extends HTMLAttributes<HTMLDivElement> {
+export interface AlertProps {
   variant?: AlertVariant;
   title?: ReactNode;
   icon?: ReactNode;
   isDismissible?: boolean;
   onDismiss?: () => void;
+  children?: ReactNode;
+  className?: string;
 }
 
 const alertStyles: Record<AlertVariant, string> = {

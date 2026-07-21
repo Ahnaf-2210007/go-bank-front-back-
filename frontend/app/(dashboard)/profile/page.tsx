@@ -66,9 +66,9 @@ export default function ProfilePage() {
         setAccount(response.data);
         setFormData((previous) => ({
           ...previous,
-          firstName: response.data.firstName,
-          lastName: response.data.lastName,
-          newEmail: response.data.email,
+          firstName: response.data?.firstName || '',
+          lastName: response.data?.lastName || '',
+          newEmail: response.data?.email || '',
         }));
       }
 

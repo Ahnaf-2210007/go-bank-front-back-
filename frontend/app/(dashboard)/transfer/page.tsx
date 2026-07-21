@@ -7,7 +7,7 @@ import { api, AccountResponse, TransferRequest } from '@/lib/api';
 import { Alert } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { WorkflowPage } from '@/components/workflow-page';
 
@@ -169,7 +169,7 @@ export default function TransferPage() {
     >
       <div className="space-y-5 animate-stagger">
         <div className="flex flex-wrap items-center gap-2 animate-entrance">
-          <Badge variant="gradient">Transfer funds</Badge>
+          <Badge>Transfer funds</Badge>
           <Badge variant="outline">Positive amounts only</Badge>
         </div>
 
