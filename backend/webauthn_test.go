@@ -77,6 +77,9 @@ func (m *mockStore) GetWebAuthnCredentialsByAccountID(accountID int) ([]*WebAuth
 func (m *mockStore) CreateWebAuthnCredentialTable() error {
 	return nil
 }
+func (m *mockStore) UpdateAccountPasskeyStatus(accountID int, hasPasskey bool) error {
+	return nil
+}
 
 func TestWebAuthnHandlers(t *testing.T) {
 	store := &mockStore{}
