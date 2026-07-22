@@ -1,0 +1,270 @@
+@import "tailwindcss";
+
+:root {
+  /* Background & Surface */
+  --background: #050816;
+  --foreground: #f4f7fb;
+  --surface: #0c1323;
+  --surface-strong: #111a2e;
+  --surface-soft: #0b1120;
+  
+  /* Changed to solid color so Tailwind opacity modifiers (like /20) work predictably */
+  --border: #94a3b8; 
+  --muted: #9fb0ca;
+  
+  /* Primary Colors - Blue to Purple Gradient */
+  --primary: #4ea2ff;
+  --primary-dark: #2563eb;
+  --primary-light: #93c5fd;
+  --primary-gradient: linear-gradient(135deg, #4ea2ff, #7c3aed);
+  
+  /* Accent Colors - Semantic */
+  --accent: #4ea2ff;
+  --accent-strong: #7dc0ff;
+  --accent-secondary: #7c3aed;
+  --accent-tertiary: #f59e0b;
+  
+  /* Success & Growth - Emerald */
+  --success: #10b981;
+  --success-light: #6ee7b7;
+  --success-dark: #059669;
+  
+  /* Warning & Opportunity - Amber */
+  --warning: #f59e0b;
+  --warning-light: #fcd34d;
+  --warning-dark: #d97706;
+  
+  /* Danger & Error - Red */
+  --danger: #ef4444;
+  --danger-light: #fca5a5;
+  --danger-dark: #dc2626;
+  
+  /* Premium & VIP - Purple */
+  --premium: #8b5cf6;
+  --premium-light: #c4b5fd;
+  --premium-dark: #6d28d9;
+  
+  /* Enhanced & Featured - Rose */
+  --featured: #f43f5e;
+  --featured-light: #fb7185;
+  --featured-dark: #e11d48;
+}
+
+/* Removed "inline" for standard Tailwind v4 compatibility */
+@theme {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-strong: var(--surface-strong);
+  --color-surface-soft: var(--surface-soft);
+  --color-border: var(--border);
+  --color-muted: var(--muted);
+  --color-primary: var(--primary);
+  --color-primary-dark: var(--primary-dark);
+  --color-primary-light: var(--primary-light);
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-accent-secondary: var(--accent-secondary);
+  --color-accent-tertiary: var(--accent-tertiary);
+  --color-success: var(--success);
+  --color-success-light: var(--success-light);
+  --color-success-dark: var(--success-dark);
+  --color-warning: var(--warning);
+  --color-warning-light: var(--warning-light);
+  --color-warning-dark: var(--warning-dark);
+  --color-danger: var(--danger);
+  --color-danger-light: var(--danger-light);
+  --color-danger-dark: var(--danger-dark);
+  --color-premium: var(--premium);
+  --color-featured: var(--featured);
+  
+  /* Added safety fallbacks in case CSS variables aren't injected */
+  --font-sans: var(--font-geist-sans, ui-sans-serif, system-ui, sans-serif);
+  --font-mono: var(--font-geist-mono, ui-monospace, SFMono-Regular, monospace);
+  
+  /* Added the missing shadow variable required for your hover effect */
+  --shadow-glow: 0 0 20px rgba(78, 162, 255, 0.6), inset 0 0 10px rgba(78, 162, 255, 0.2);
+  
+  /* Animation durations for consistency */
+  --duration-fast: 150ms;
+  --duration-base: 250ms;
+  --duration-slow: 500ms;
+}
+
+/* Phase 2: Animation Keyframes */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-down {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-left {
+  from { opacity: 0; transform: translateX(12px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes fade-scale-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes lift {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-4px); }
+}
+
+@keyframes pulse-subtle {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+@keyframes shimmer {
+  0% { background-position: -1000px 0; }
+  100% { background-position: 1000px 0; }
+}
+
+@keyframes spin-smooth {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes glow {
+  0%, 100% { box-shadow: 0 0 5px rgba(78, 162, 255, 0.3), inset 0 0 5px rgba(78, 162, 255, 0.1); }
+  50% { box-shadow: 0 0 20px rgba(78, 162, 255, 0.6), inset 0 0 10px rgba(78, 162, 255, 0.2); }
+}
+
+/* Stagger animation for lists */
+@keyframes stagger-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@layer base {
+  * {
+    @apply border-border/20;
+  }
+
+  html {
+    background: var(--background);
+  }
+
+  body {
+    min-height: 100vh;
+    background:
+      radial-gradient(circle at top left, rgba(78, 162, 255, 0.18), transparent 28%),
+      radial-gradient(circle at 85% 8%, rgba(125, 192, 255, 0.12), transparent 24%),
+      radial-gradient(circle at bottom right, rgba(57, 217, 138, 0.08), transparent 30%),
+      var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+  }
+
+  ::selection {
+    background: rgba(78, 162, 255, 0.35);
+    color: var(--foreground);
+  }
+}
+
+@layer components {
+  /* Phase 1: Enhanced Panel Components */
+  .gobank-shell {
+    @apply relative flex min-h-screen flex-col;
+  }
+
+  .gobank-panel {
+    /* Fixed border opacity reference to match your intended transparency */
+    @apply rounded-[1.5rem] border border-border/20 bg-surface/85 shadow-[0_24px_80px_-42px_rgba(2,6,23,0.95)] backdrop-blur transition-all duration-300;
+  }
+
+  .gobank-panel-strong {
+    @apply rounded-[1.75rem] border border-accent/20 bg-surface-strong/90 shadow-[0_32px_100px_-50px_rgba(78,162,255,0.45)] backdrop-blur transition-all duration-300;
+  }
+
+  .gobank-panel-gradient {
+    @apply rounded-[1.75rem] border-0 bg-gradient-to-br from-primary/20 via-primary-dark/10 to-accent-secondary/10 shadow-[0_32px_100px_-50px_rgba(78,162,255,0.45)] backdrop-blur transition-all duration-300;
+  }
+
+  .gobank-panel-featured {
+    @apply rounded-[1.75rem] border border-featured/30 bg-gradient-to-br from-featured/5 via-surface-strong/90 to-surface/85 shadow-[0_32px_100px_-50px_rgba(78,162,255,0.45)] backdrop-blur transition-all duration-300;
+  }
+
+  .gobank-muted {
+    color: var(--muted);
+  }
+
+  /* Phase 2: Animation Utilities */
+  .animate-entrance { animation: fade-scale-in 0.3s ease-out; }
+  .animate-entrance-up { animation: slide-up 0.3s ease-out; }
+  .animate-entrance-down { animation: slide-down 0.3s ease-out; }
+  .animate-entrance-left { animation: slide-left 0.3s ease-out; }
+
+  /* Hover Effects */
+  .animate-hover-lift {
+    @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-lg;
+  }
+
+  .animate-hover-lift-strong {
+    @apply transition-all duration-300 hover:-translate-y-2 hover:shadow-xl;
+  }
+
+  .animate-hover-glow {
+    @apply transition-all duration-300 hover:shadow-glow;
+  }
+
+  /* Loading States */
+  .animate-pulse-smooth { animation: pulse-subtle 2s ease-in-out infinite; }
+  .animate-spin-smooth { animation: spin-smooth 1s linear infinite; }
+  .animate-shimmer {
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+  }
+
+  /* Stagger Effect for Lists */
+  .animate-stagger > * {
+    animation: stagger-in 0.4s ease-out forwards;
+  }
+
+  .animate-stagger > *:nth-child(1) { animation-delay: 0.05s; }
+  .animate-stagger > *:nth-child(2) { animation-delay: 0.1s; }
+  .animate-stagger > *:nth-child(3) { animation-delay: 0.15s; }
+  .animate-stagger > *:nth-child(4) { animation-delay: 0.2s; }
+  .animate-stagger > *:nth-child(5) { animation-delay: 0.25s; }
+  .animate-stagger > *:nth-child(n+6) { animation-delay: 0.3s; }
+
+  /* Glow Effect */
+  .animate-glow {
+    animation: glow 3s ease-in-out infinite;
+  }
+
+  /* Smooth Transitions */
+  .transition-smooth { @apply transition-all duration-300 ease-out; }
+  .transition-smooth-fast { @apply transition-all duration-150 ease-out; }
+  .transition-smooth-slow { @apply transition-all duration-500 ease-out; }
+
+  /* Focus States with Animation */
+  .focus-ring {
+    @apply focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-surface transition-all duration-200;
+  }
+
+  .focus-ring-secondary {
+    @apply focus:outline-none focus:ring-2 focus:ring-accent-secondary/50 focus:ring-offset-2 focus:ring-offset-surface transition-all duration-200;
+  }
+
+  /* Accessibility: Reduce motion */
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}

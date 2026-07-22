@@ -1,0 +1,5 @@
+{
+  "framework": "go",
+  "installCommand": "go mod download",
+  "buildCommand": ""
+}
